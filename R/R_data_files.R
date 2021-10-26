@@ -54,7 +54,7 @@ data$Hsd.day <- scale(data$Hsd.day)
 data$Hsd.night <- scale(data$Hsd.night)
 
 # evaluating the colinearity graphically
-source(here::here("R/panel_functions.R"))
+source(here::here("R/functions/panel_functions.R"))
 
 pairs(data[,43:50], upper.panel=panel.cor, diag.panel=panel.hist)
 
