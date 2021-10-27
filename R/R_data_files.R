@@ -69,3 +69,13 @@ data_comm %>% head()
 
 saveRDS(object = data_models, file = here::here("output/data_models_std.rds"))
 saveRDS(data_comm, here::here("output/community_env_data.rds"))
+
+# CITATION FOR PACKAGES AND R
+writeLines(toBibtex(citation()), con = 'doc/references/reference_R')
+writeLines(toBibtex(citation("iNEXT")), con = 'doc/references/reference_iNEXT')
+writeLines(toBibtex(citation("ggplot2")), con = 'doc/references/reference_ggplot2')
+writeLines(toBibtex(citation("lme4")), con = 'doc/references/reference_lme4')
+writeLines(toBibtex(citation("car")), con = 'doc/references/reference_car')
+writeLines(toBibtex(citation("vegan")), con = 'doc/references/reference_vegan')
+writeLines(toBibtex(citation("indicspecies")), con = 'doc/references/reference_indicspecies')
+writeLines(toBibtex(citation("betapart")), con = 'doc/references/reference_betapart')
