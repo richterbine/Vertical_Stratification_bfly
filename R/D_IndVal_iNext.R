@@ -19,7 +19,6 @@ comm.bfly <- (comm.bfly[,4:41])
 group <- as.factor(substr(rownames(comm.bfly), 1, 1))
 group <- ifelse(group == "C", 1, 2)
 
-comm.bfly <- as.matrix(comm.bfly)
 
 # Indicator Value analysis
 IndVal.bfly <- multipatt(comm.bfly, group, control = how(nperm = 999))
@@ -33,15 +32,19 @@ library(iNEXT)
 
 # Rarefection/Extrapolation curves
 head(comm.bfly)
-rownames(comm.bfly) <- substr(rownames(comm.bfly), 1,1)
 
-data.inext <- list(Canopy = rowSums(comm.bfly[which(rownames(comm.bfly) == "C"),]),
-                   Understory = rowSums(comm.bfly[which(rownames(comm.bfly) == "U"),]))
+data.inext <- list(Canopy = colSums(comm.bfly[which(substr(rownames(comm.bfly), 1,1) == "C"),]),
+                   Understory = colSums(comm.bfly[which(substr(rownames(comm.bfly), 1,1) == "U"),]))
 data.inext %>% str
+
+plot(sort(data.inext$Canopy, decreasing = T))
+plot(sort(data.inext$Understory, decreasing = T))
 
 DataInfo(data.inext)
 
 out <- iNEXT(data.inext, q = c(0, 1, 2), nboot = 1000, datatype = "abundance")
+out$iNextEst$Canopy$order <- as.factor(out$iNextEst$Canopy$order)
+out$iNextEst$Understory$order <- as.factor(out$iNextEst$Understory$order)
 
 levels(out$iNextEst$Canopy$order)[levels(out$iNextEst$Canopy$order) == "0"] <- "q = 0"
 levels(out$iNextEst$Canopy$order)[levels(out$iNextEst$Canopy$order) == "1"] <- "q = 1"
@@ -65,10 +68,14 @@ p.cov.base <- ggiNEXT(out, type=3, facet.var="order")  +
   scale_fill_manual(values = c("firebrick3", "palegreen3")) +
   theme(legend.position = "right") 
 
-cowplot::plot_grid(p.samp.size + theme(legend.position = "none"),
+RE_curves <- cowplot::plot_grid(p.samp.size + theme(legend.position = "none"),
                    p.cov.base + theme(legend.position = "none"))
 
+cowplot::save_plot(here::here('output/Images/G_RE_curves.png'), RE_curves,
+                   base_height = 6, base_width = 14)
+
 # Diversity profile estimator
+source(here::here("R/functions/ChaoHill_function.R"))
 prof.can <- ChaoHill(data.inext$Canopy, datatype = "abundance")
 prof.und <- ChaoHill(data.inext$Understory, datatype = "abundance")
 
@@ -89,12 +96,16 @@ data.profile$q <- substr(data.profile$q, 5,7)
 data.profile$q <- as.numeric(data.profile$q)
 data.profile$type <- ifelse(data.profile$type == "Observed", "Empirical", "Proposed")
 
-ggplot(data = data.profile, aes(x = q, y = Values,  colour = Strata)) +
+profile <- ggplot(data = data.profile, aes(x = q, y = Values,  colour = Strata)) +
   geom_line(size = .8) + facet_wrap(~type) +
   geom_ribbon(aes(ymin= LCI, ymax= UCI,  fill = Strata),
                          alpha = .1, linetype = 0) +
-  scale_x_continuous(breaks = c(0,1,2,3)) +
+  scale_x_continuous(breaks = c(0,1,2,3)) + scale_y_sqrt() +
   scale_color_manual(values = c("firebrick3", "palegreen3")) +
   scale_fill_manual(values = c("firebrick3", "palegreen3")) +
   labs(x = "q order", y = "Hill numbers") 
+profile
 
+cowplot::save_plot(here::here("output/Images/G_profile_plot.png"), 
+                   profile + theme(legend.position = "none"),
+                   base_height = 4, base_width = 8)
