@@ -59,17 +59,18 @@ levels(out$iNextEst$Understory$order)[levels(out$iNextEst$Understory$order) == "
 p.samp.size <- ggiNEXT(out, type=1, facet.var="order") +
   scale_color_manual(values = c("firebrick3", "palegreen3")) +
   scale_fill_manual(values = c("firebrick3", "palegreen3")) +
-  theme(legend.position = "right")
+  theme(legend.position = "right") + labs(tag = "a)")
 
 
 # Coverage-based R/E curves, separating by "order"
 p.cov.base <- ggiNEXT(out, type=3, facet.var="order")  +
   scale_color_manual(values = c("firebrick3", "palegreen3")) +
   scale_fill_manual(values = c("firebrick3", "palegreen3")) +
-  theme(legend.position = "right") 
+  theme(legend.position = "right") + labs(tag = "b)")
 
 RE_curves <- cowplot::plot_grid(p.samp.size + theme(legend.position = "none"),
-                   p.cov.base + theme(legend.position = "none"))
+                   p.cov.base + theme(legend.position = "none"),
+                   ncol = 1)
 
 cowplot::save_plot(here::here('output/Images/G_RE_curves.png'), RE_curves,
                    base_height = 6, base_width = 14)
