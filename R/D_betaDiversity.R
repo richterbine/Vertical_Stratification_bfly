@@ -53,7 +53,7 @@ comm.m2
 comm.m3 <- adonis2(dGRA ~ Tmean.day + Tsd.night + Hmean.day + Strata, 
                   data = comm.env, permutations = perm, by="marg")
 comm.m3
-# a variação na temperatura da noite afeta o quanto as espécies são aninhadas
+# a variação na umidade realtiva media afeta o quanto as espécies são aninhadas
 
 # verify the homogeneity on the variance for each component
 group <- as.factor(comm.env$Strata)
@@ -178,7 +178,7 @@ dbc.st
 dbal.st <- ggplot(data = subset(data, pairs != "UC"), aes(x= pairs, y= Balance)) + 
   geom_boxplot(aes(colour = pairs, fill = pairs), alpha = .5) +
   #geom_smooth() + 
-  labs(x = "Strata", y = expression(d[BAL]), tag = "e)") +
+  labs(x = "Strata", y = expression(d[BC-BAL]), tag = "e)") +
   scale_color_manual(name = "Site pairs", labels = c("Canopy - Canopy", "Understory - Understory"),
                      values = c("firebrick3", "palegreen3")) +
   scale_fill_manual(name = "Site pairs", labels = c("Canopy - Canopy", "Understory - Understory"),
@@ -192,7 +192,7 @@ data %>% head
 
 dgra.tsd <- ggplot(data = subset(data, pairs != "UC"), aes(x = Tsd.night, y = Gradient)) +
   geom_point(aes(colour = pairs), alpha = .5) +
-  geom_smooth(color = "black") + labs(x = "Mean Humidity", y = expression(d[GRA]), tag = "f)") +
+  geom_smooth(color = "black") + labs(x = "Mean Humidity", y = expression(d[BC-GRA]), tag = "f)") +
   scale_color_manual(name = "Site pairs", labels = c("Canopy - Canopy", "Understory - Understory"),
                      values = c("firebrick3", "palegreen3")) +
   scale_fill_manual(name = "Site pairs", labels = c("Canopy - Canopy", "Understory - Understory"),
@@ -207,4 +207,4 @@ plot.betadisper <- cowplot::plot_grid(plot.bc, plot.bal, plot.gra,
 plot.betadisper
 
 cowplot::save_plot(here::here("output/Images/G_betadisper.png"), plot.betadisper,
-                  base_height = 8, base_width = 12)
+                  base_height = 6, base_width = 10)

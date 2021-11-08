@@ -1,4 +1,5 @@
 
+
 # Required packages -------------------------------------------------------
 library(ggeffects)
 library(ggplot2)
@@ -11,18 +12,18 @@ data_models <- readRDS(here::here("output/data_models_std.rds"))
 summary(abn.nb) # model for abundance
 
 # predicting the values
-pred.abn.tmean <- ggpredict(abn.nb, c("Tmean.day"), type = "re")
-pred.abn.tmean
+pred.abn.tmean <- ggpredict(abn.nb, c("Tmean.day", "Strata"), type = "re")
+pred.abn.tmean$group
 
 plot(pred.abn.tmean)
 
-p.tmean <- ggplot(pred.abn.tmean, aes(x = x, y = predicted)) +
-  geom_smooth(method = "loess", color = "black") + 
-  geom_point(data = data_models, aes(x = Tmean.day, y = Abundance), 
+p.tmean <- ggplot(pred.abn.tmean, aes(x = x, y = predicted, colour = group)) +
+  geom_smooth(method = "loess") + 
+  geom_point(data = data_models, aes(x = Tmean.day, y = Abundance, colour = Strata), 
                                    alpha = .5) +
-# geom_ribbon(aes(ymin= conf.low, ymax= conf.high),
-          #            alpha = .1, linetype = 0) + 
-  scale_y_sqrt() +
+ # geom_ribbon(aes(ymin= conf.low, ymax= conf.high),
+ #                      alpha = .1, linetype = 0) + 
+  scale_y_sqrt() +   scale_color_manual(values = c("firebrick3", "palegreen3" )) +
   labs(x = "Mean Temperature", y = "Predicted Abundance", tag = "a)")
 p.tmean
 # quando a temperature média do aumenta, a tendencia é aumantar a abundancia das espécies,
@@ -65,7 +66,7 @@ p.hmean
 # amostradas, baixas medias levam a menores abundancias no dossel, porém altas medias aumentam
 # a abudancia no dossel. baixa umidade restringe a quantidade de individuos no dossel.
 
-abn.models <- cowplot::plot_grid(p.tmean, p.tsd + theme(legend.position = "none"),
+abn.models <- cowplot::plot_grid(p.tmean + theme(legend.position = "none"), p.tsd + theme(legend.position = "none"),
                    p.hmean + theme(legend.position = "none"))
 
 cowplot::save_plot(here::here("output/Images/G_abundance_models.png"),

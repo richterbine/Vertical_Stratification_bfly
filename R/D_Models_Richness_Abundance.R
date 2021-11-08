@@ -9,12 +9,32 @@ library(tidyverse)
 # Evaluating the effect of environmental factors in Richness and Abundance --------
 # read files
 data_models <- readRDS(here::here("output/data_models_std.rds"))
-data_models %>% str
+data_mod_unscaled <- readRDS(here::here("output/unscaled_data.rds"))
+data_unscaled <- data_mod_unscaled[, c(1:3, 43:50)]
+head(data_unscaled)
+
 sum(is.na(data_models))
+
+# exploring the data
+source(here::here("R/functions/panel_functions.R"))
+pairs(data_models[,3:10], diag.panel = panel.hist, upper.panel = panel.cor)
+
+# with ggforce package
+
+ggplot(data_unscaled, aes(x = .panel_x, y = .panel_y, colour = Strata, fill = Strata)) + 
+  geom_point(alpha = 0.2, size = 1) + 
+  geom_autodensity(alpha = .5) + 
+  geom_smooth(aes(colour = Strata, fill = Strata)) + 
+  scale_color_manual(values = c("firebrick3", "palegreen3")) +
+  scale_fill_manual(values = c("firebrick3", "palegreen3")) +
+  facet_matrix(vars(Tmean.day, Tmean.night, Hmean.day, Hmean.night,
+                    Tsd.day, Tsd.night, Hsd.day, Hsd.night), layer.diag = 2, layer.upper = 3, 
+               grid.y.diag = FALSE)
 
 ###########################################################################
 
 # For Richness data -------------------------------------------------------
+#data_models$Strata <- factor(data_models$Strata, levels = c("Understory", "Canopy"))
 
 # Null models
 ric.pois.null <- glmer(Richness ~ 1 + (1|SU), family = poisson, data = data_models)
@@ -109,4 +129,4 @@ model.sel(abn.nb.null, abn.nb)
 r.squaredGLMM(abn.nb)
 
 saveRDS(ric.pois, here::here("output/output_model_ric.rds"))
-saveRDS(abn.nb, here::here("output/output_model_abn.rds"))
+saveRDS(abn.nb, here::here("output/output_model_abn_new.rds"))

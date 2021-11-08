@@ -73,7 +73,7 @@ RE_curves <- cowplot::plot_grid(p.samp.size + theme(legend.position = "none"),
                    ncol = 1)
 
 cowplot::save_plot(here::here('output/Images/G_RE_curves.png'), RE_curves,
-                   base_height = 6, base_width = 14)
+                   base_height = 8, base_width = 12)
 
 # Diversity profile estimator
 source(here::here("R/functions/ChaoHill_function.R"))
