@@ -21,12 +21,22 @@ comm.spp <- comm.spp[,-which(colSums(comm.spp) == 0)]
 comm.env <- comm.bfly[,c(1:3, 43:50)]
 comm.env %>% head()
 
+# Beta diversity partitioning following the method proposed by Podani & Schmera (2011) and Carvalho et al. (2012)
+beta_res <- BAT::beta(comm.spp, abund = T, comp = T, runs = 499)
+Btot <- beta_res$Btotal
+Brep <- beta_res$Brepl
+Bric <- beta_res$Brich
+
+m2_sd <- data.frame(Mean = c(mean(Btot, na.rm = T), mean(Brep, na.rm = T), mean(Bric, na.rm = T)),
+                   SD = c(sd(Btot, na.rm = T), sd(Brep, na.rm = T), sd(Bric, na.rm = T)))
+
+rownames(m2_sd) <- c("Bcc", "B-3", "Brich")
 
 #### usando as matrizes de particionamento de variancia Baselga 2013
-dist <- bray.part(comm.spp)
-dBC <- dist$bray
-dBAL<- dist$bray.bal
-dGRA<- dist$bray.gra
+beta_bas <- betapart::bray.part(comm.spp)
+dBC <- beta_bas$bray
+dBAL <- beta_bas$bray.bal
+dGRA <- beta_bas$bray.gra
 
 m_sd <- data.frame(Mean = c(mean(dBC, na.rm = T), mean(dBAL, na.rm = T), mean(dGRA, na.rm = T)),
                    SD = c(sd(dBC, na.rm = T), sd(dBAL, na.rm = T), sd(dGRA, na.rm = T)))
@@ -41,12 +51,22 @@ setBlocks(perm) <- with(comm.env, SU) # consider the "random effect" of Sampling
 comm.m1 <- adonis2(dBC ~ Tmean.day + Tsd.night + Hmean.day + Strata, 
                   data = comm.env, permutations = perm, by = "marg")
 comm.m1
+
+## model to evaluate the effect of covariates in the total dissimilarity
+comm.m1.1 <- adonis2(Btot ~ Tmean.day + Tsd.night + Hmean.day + Strata, 
+                   data = comm.env, permutations = perm, by = "marg")
+comm.m1.1
 # efeito do estrato sobre a variação na comunidade
 
 ### model to evauate the effect of covariates in the "turnover" component
 comm.m2 <- adonis2(dBAL ~ Tmean.day + Tsd.night + Hmean.day + Strata, 
                   data = comm.env, permutations = perm, by="margin")
 comm.m2
+
+### model to evauate the effect of covariates in the "turnover" component
+comm.m2.1 <- adonis2(Brep ~ Tmean.day + Tsd.night + Hmean.day + Strata, 
+                   data = comm.env, permutations = perm, by="margin")
+comm.m2.1
 # efeito do estrato no turnover, canopy com menos turnover?
 
 ### model to evaluate the effect of covariates in the "nestedness" component
@@ -55,19 +75,24 @@ comm.m3 <- adonis2(dGRA ~ Tmean.day + Tsd.night + Hmean.day + Strata,
 comm.m3
 # a variação na umidade realtiva media afeta o quanto as espécies são aninhadas
 
+### model to evaluate the effect of covariates in the "nestedness" component
+comm.m3 <- adonis2(Bric ~ Tmean.day + Tsd.night + Hmean.day + Strata, 
+                   data = comm.env, permutations = perm, by="marg")
+comm.m3
+
 # verify the homogeneity on the variance for each component
 group <- as.factor(comm.env$Strata)
 
-disp.dbc <- betadisper(dBC, group, type = "centr")
+disp.dbc <- betadisper(Btot, group, type = "centr")
 plot(betadisper(dBC, group, type = "centr"))
 anova(betadisper(dBC, group, type = "centr"))
 boxplot(betadisper(dBC, group, type = "centr"))
 
 
 disp.dbal <- betadisper(dBAL, group, type = "centr")
-plot(betadisper(dBAL, group, type = "centr"))
-anova(betadisper(dBAL, group, type = "centr"))
-boxplot(betadisper(dBAL, group, type = "centr"))
+plot(betadisper(Brep, group, type = "centr"))
+anova(betadisper(Brep, group, type = "centr"))
+boxplot(betadisper(Brep, group, type = "centr"))
 
 
 disp.dgra  <- betadisper(dGRA, group, type = "centr")
